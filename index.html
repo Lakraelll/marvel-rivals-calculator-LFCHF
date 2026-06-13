@@ -337,23 +337,18 @@
 
         .rank-lord {
             color: #ffcc00;
-            animation: lordFlash 2s infinite ease-in-out;
+            animation: rankFlash 2s infinite ease-in-out;
         }
 
         .rank-champion {
             color: #ff3e3e;
             text-shadow: 0 0 4px #ff0000;
-            animation: champFlash 0.8s infinite ease-in-out;
+            animation: rankFlash 2s infinite ease-in-out;
         }
 
-        @keyframes lordFlash {
-            0%, 100% { opacity: 0.6; text-shadow: 0 0 2px rgba(255,204,0,0.4); }
-            50% { opacity: 1; text-shadow: 0 0 8px rgba(255,204,0,1); }
-        }
-
-        @keyframes champFlash {
-            0%, 100% { opacity: 0.4; text-shadow: 0 0 2px rgba(255,0,0,0.3); transform: scale(1); }
-            50% { opacity: 1; text-shadow: 0 0 14px #ff0000, 0 0 4px #ffffff; transform: scale(1.03); }
+        @keyframes rankFlash {
+            0%, 100% { opacity: 0.5; text-shadow: 0 0 2px rgba(255,255,255,0.2); transform: scale(1); }
+            50% { opacity: 1; text-shadow: 0 0 10px currentColor, 0 0 2px #ffffff; transform: scale(1.02); }
         }
 
         .footer-container {
@@ -534,12 +529,11 @@
             <input type="number" id="currentLevel" value="1" min="1" max="50">
         </div>
         <div class="form-group">
-            <label pour="targetLevel">Target Level:</label>
+            <label for="targetLevel">Target Level:</label>
             <input type="number" id="targetLevel" value="50" min="1" max="50">
         </div>
     </div>
 
-    <!-- Custom Threshold Input Fields -->
     <div id="customInputs" class="custom-inputs">
         <label>Enter Custom Metrics per Level Bracket:</label>
         <div class="grid-row">
@@ -601,7 +595,6 @@
     </div>
 </div>
 
-<!-- POPUP MODAL -->
 <div class="modal-overlay" id="statsModal">
     <div class="modal-content">
         <h3>Global Core Stats Setup</h3>
@@ -648,7 +641,6 @@
 </div>
 
 <script>
-    // Alle drei Haupt-Werte nun standardmäßig auf 196.000 gesetzt
     const defaultCoreStats = {
         dmg: 196000,
         blocked: 196000,
@@ -709,14 +701,6 @@
         "Winter Soldier": { class: "DPS", lines: [[3700, 4], [7500, 8], [11000, 12], [15000, 17], [15000, 17]] },
         "Wolverine": { class: "DPS", lines: [[4400, 5], [8800, 10], [13000, 15], [18000, 20], [18000, 20]] }
     };
-
-    const levelRanges = [
-        { min: 1,  max: 5,  costPerLevel: 125,  questPoints: 7,  timePoints: 80,  name: "Lvl 1 - 5", badge: "" },
-        { min: 5,  max: 10, costPerLevel: 240,  questPoints: 13, timePoints: 80,  name: "Lvl 5 - 10", badge: "" },
-        { min: 10, max: 15, costPerLevel: 400,  questPoints: 20, timePoints: 80,  name: "Lvl 10 - 15", badge: "" },
-        { min: 15, max: 20, costPerLevel: 480,  questPoints: 26, timePoints: 80,  name: "Lvl 15 - 20", badge: '<span class="rank-badge rank-lord">[Lord]</span>' },
-        { min: 20, max: 50, costPerLevel: 1600, questPoints: 80, timePoints: 240, name: "Lvl 20 - 50", badge: '<span class="rank-badge rank-champion">[Champion]</span>' }
-    ];
 
     let selectedCharacterKey = "custom"; 
 
@@ -803,9 +787,28 @@
         searchInput.value = (key === "custom") ? "" : displayName;
         panel.style.display = "none";
         customInputsDiv.style.display = (key === "custom") ? "block" : "none";
+
+        if (key !== "custom" && database[key]) {
+            const charClass = database[key].class;
+            if (charClass === "Support") {
+                coreStats.Tank = 70;      
+                coreStats.Support = 100;  
+            } else if (charClass === "Tank") {
+                coreStats.Tank = 150;     
+                coreStats.Support = 120;  
+            } else {
+                coreStats.Tank = defaultCoreStats.Tank;
+                coreStats.Support = defaultCoreStats.Support;
+            }
+        } else {
+            coreStats.Tank = defaultCoreStats.Tank;
+            coreStats.Support = defaultCoreStats.Support;
+        }
+
         calculate();
     }
 
+    // WICHTIG: Event-Listener für Eingabeänderungen sicherstellen!
     searchInput.addEventListener("click", () => { searchInput.value = ""; showSuggestions(); });
     searchInput.addEventListener("focus", showSuggestions);
     searchInput.addEventListener("input", showSuggestions);
@@ -825,10 +828,21 @@
         document.getElementById(`custom_c${i}`).addEventListener('input', calculate);
     }
 
+    // Neue kaufmännische Rundungsfunktion (Rundet ab .5 auf)
     function formatFarms(farmsValue) {
         if (farmsValue <= 0) return "0 Farms";
-        return `${Math.ceil(farmsValue)} Farms`;
+        // Kaufmännisches Runden
+        const roundedFarms = Math.round(farmsValue);
+        return `${roundedFarms} Farms`;
     }
+
+    const levelRanges = [
+        { min: 1,  max: 5,  costPerLevel: 125,  questPoints: 7,  timePoints: 80,  name: "Lvl 1 - 5", badge: "" },
+        { min: 5,  max: 10, costPerLevel: 240,  questPoints: 13, timePoints: 80,  name: "Lvl 5 - 10", badge: "" },
+        { min: 10, max: 15, costPerLevel: 400,  questPoints: 20, timePoints: 80,  name: "Lvl 10 - 15", badge: "" },
+        { min: 15, max: 20, costPerLevel: 480,  questPoints: 26, timePoints: 80,  name: "Lvl 15 - 20", badge: '<span class="rank-badge rank-lord">[Lord]</span>' },
+        { min: 20, max: 50, costPerLevel: 1600, questPoints: 80, timePoints: 240, name: "Lvl 20 - 50", badge: '<span class="rank-badge rank-champion">[Champion]</span>' }
+    ];
 
     function calculate() {
         let currentLvl = parseInt(document.getElementById("currentLevel").value) || 1;
@@ -868,7 +882,7 @@
         let farmsCumulative = 0;
         let firstPrintedRow = true;
         const tableBody = document.getElementById("resultTableBody");
-        tableBody.innerHTML = "";
+        tableBody.innerHTML = ""; // Tabelle leeren
 
         levelRanges.forEach((range, index) => {
             if (range.min >= targetLvl) return;
@@ -905,12 +919,13 @@
             firstPrintedRow = false;
         });
 
+        // Wenn keine Zeilen generiert wurden, Hinweis anzeigen
         if (tableBody.innerHTML === "" || currentLvl >= targetLvl) {
             tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Your target level is equal to or lower than your current level!</td></tr>`;
         }
     }
 
-    calculate();
+    calculate(); // Initiale Berechnung
 </script>
 
 </body>
