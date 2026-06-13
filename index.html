@@ -308,7 +308,7 @@
             text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
         }
 
-        tr { Black-color: transparent; transition: transform 0.2s ease, background-color 0.2s; }
+        tr { transition: transform 0.2s ease, background-color 0.2s; }
 
         tbody tr:hover td {
             background-color: rgba(74, 62, 37, 0.2) !important;
@@ -327,7 +327,6 @@
             margin-bottom: 2px;
         }
 
-        /* Blitzer-Animationen für Ränge */
         .rank-badge {
             font-weight: 900;
             margin-left: 8px;
@@ -336,13 +335,11 @@
             letter-spacing: 0.5px;
         }
 
-        /* Lord blitzt dezent */
         .rank-lord {
             color: #ffcc00;
             animation: lordFlash 2s infinite ease-in-out;
         }
 
-        /* Champion blitzt aggressiver und stärker */
         .rank-champion {
             color: #ff3e3e;
             text-shadow: 0 0 4px #ff0000;
@@ -408,7 +405,7 @@
             transform: translateY(0);
         }
 
-        .modal-header {
+        .modal-content h3 {
             font-size: 20px;
             color: var(--accent-color);
             text-transform: uppercase;
@@ -462,7 +459,6 @@
 
         .btn-reset {
             background-color: rgba(184, 134, 11, 0.15);
-            border: 1px solid darkbackground;
             border: 1px solid #b8860b;
             color: var(--accent-color);
         }
@@ -538,7 +534,7 @@
             <input type="number" id="currentLevel" value="1" min="1" max="50">
         </div>
         <div class="form-group">
-            <label for="targetLevel">Target Level:</label>
+            <label pour="targetLevel">Target Level:</label>
             <input type="number" id="targetLevel" value="50" min="1" max="50">
         </div>
     </div>
@@ -580,7 +576,7 @@
             <label for="customClass">Class Setup for Custom Selection:</label>
             <select id="customClass">
                 <option value="Tank">Tank (Uses Dmg Blocked & KOs)</option>
-                <option value="Support">Support (Uses Healing & Assists)</option>
+                <option value="Support">Support (Uses Healing & Combined KOs/Assists)</option>
                 <option value="DPS">DPS (Uses Damage & Finals)</option>
             </select>
         </div>
@@ -608,7 +604,7 @@
 <!-- POPUP MODAL -->
 <div class="modal-overlay" id="statsModal">
     <div class="modal-content">
-        <div class="modal-header">Global Core Stats Setup</div>
+        <h3>Global Core Stats Setup</h3>
         <div class="modal-explain-text">
             Changing these values updates your global matchmaking output, directly altering the overall points generated per farm across all heroes.
         </div>
@@ -621,21 +617,21 @@
             </div>
             <div class="form-group">
                 <label for="modalBlocked">Dmg Blocked (Tanks):</label>
-                <input type="number" id="modalBlocked" value="150000" min="0" max="200000">
+                <input type="number" id="modalBlocked" value="196000" min="0" max="200000">
                 <div class="stat-limit-hint">Max 200k</div>
             </div>
             <div class="form-group">
                 <label for="modalHealing">Healing (Supports):</label>
-                <input type="number" id="modalHealing" value="150000" min="0" max="200000">
+                <input type="number" id="modalHealing" value="196000" min="0" max="200000">
                 <div class="stat-limit-hint">Max 200k</div>
             </div>
             <div class="form-group">
                 <label for="modalKos">KOs (Tank Stat):</label>
-                <input type="number" id="modalKos" value="150" min="0">
+                <input type="number" id="modalKos" value="70" min="0">
             </div>
             <div class="form-group">
                 <label for="modalAssists">Assists (Support Stat):</label>
-                <input type="number" id="modalAssists" value="150" min="0">
+                <input type="number" id="modalAssists" value="100" min="0">
             </div>
             <div class="form-group">
                 <label for="modalFinals">Finals (DPS Stat):</label>
@@ -645,24 +641,23 @@
 
         <div class="modal-buttons">
             <button class="btn-modal btn-cancel" id="closeStatsModal">Cancel</button>
-            <button class="btn-modal btn-reset" id="resetStatsModal">Reset to Defaults</button>
+            <button class="btn-modal btn-reset" id="resetStatsModal">Reset Defaults</button>
             <button class="btn-modal btn-confirm" id="saveStatsModal">Apply & Save</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Standard-Durchschnittswerte zum Zurücksetzen hinterlegen
+    // Alle drei Haupt-Werte nun standardmäßig auf 196.000 gesetzt
     const defaultCoreStats = {
         dmg: 196000,
-        blocked: 150000,
-        healing: 150000,
-        Tank: 150,       
-        Support: 150,    
+        blocked: 196000,
+        healing: 196000,
+        Tank: 70,       
+        Support: 100,    
         DPS: 77          
     };
 
-    // Aktive Core Stats klonen
     let coreStats = { ...defaultCoreStats };
 
     const database = {
@@ -748,7 +743,6 @@
 
     closeStatsBtn.addEventListener("click", () => statsModal.classList.remove("active"));
 
-    // Reset Knopf Logik
     resetStatsBtn.addEventListener("click", () => {
         document.getElementById("modalDmg").value = defaultCoreStats.dmg;
         document.getElementById("modalBlocked").value = defaultCoreStats.blocked;
@@ -866,6 +860,11 @@
             activeBigStatValue = coreStats.blocked; 
         }
 
+        let activeClassStatValue = coreStats[charClass];
+        if (charClass === "Support") {
+            activeClassStatValue = coreStats.Tank + coreStats.Support;
+        }
+
         let farmsCumulative = 0;
         let firstPrintedRow = true;
         const tableBody = document.getElementById("resultTableBody");
@@ -886,13 +885,12 @@
             const threshCls = lines[index][1];
 
             const dmgPoints = Math.floor(activeBigStatValue / threshDmg) * range.questPoints;
-            const clsPoints = Math.floor(coreStats[charClass] / threshCls) * range.questPoints;
+            const clsPoints = Math.floor(activeClassStatValue / threshCls) * range.questPoints;
             const totalPointsPerFarm = range.timePoints + dmgPoints + clsPoints;
 
             const farmsRange = dynamicRangeCost / totalPointsPerFarm;
             farmsCumulative += farmsRange;
 
-            // Name der Zeile + Badge anhängen falls vorhanden (Lord/Champ)
             let rowName = `Lvl ${activeStart} - ${activeEnd} ${range.badge}`;
 
             const tr = document.createElement("tr");
