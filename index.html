@@ -242,25 +242,117 @@
 
         .suggestion-item:last-child { border-bottom: none; }
 
+        /* NEUE KRAFTVOLLE GLOWING BADGES STYLES */
         .role-badge {
             font-size: 11px;
-            padding: 2px 6px;
+            padding: 4px 10px;
             border-radius: 4px;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            text-align: center;
+            min-width: 75px;
         }
-        .badge-dps { background-color: rgba(255, 107, 107, 0.15); color: var(--dps-color); border: 1px solid rgba(255, 107, 107, 0.3); }
-        .badge-tank { background-color: rgba(84, 160, 255, 0.15); color: var(--tank-color); border: 1px solid rgba(84, 160, 255, 0.3); }
-        .badge-support { background-color: rgba(29, 209, 161, 0.15); color: var(--support-color); border: 1px solid rgba(29, 209, 161, 0.3); }
-        .badge-custom { background-color: rgba(255, 215, 0, 0.1); color: var(--accent-color); border: 1px solid rgba(255, 215, 0, 0.2); }
+        .badge-tank { 
+            background-color: rgba(84, 160, 255, 0.12); 
+            color: var(--tank-color); 
+            border: 1px solid var(--tank-color); 
+            box-shadow: 0 0 10px rgba(84, 160, 255, 0.4);
+        }
+        .badge-dps { 
+            background-color: rgba(255, 107, 107, 0.12); 
+            color: var(--dps-color); 
+            border: 1px solid var(--dps-color); 
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+        }
+        .badge-support { 
+            background-color: rgba(29, 209, 161, 0.12); 
+            color: var(--support-color); 
+            border: 1px solid var(--support-color); 
+            box-shadow: 0 0 10px rgba(29, 209, 161, 0.4);
+        }
+        .badge-custom { 
+            background-color: rgba(255, 215, 0, 0.1); 
+            color: var(--accent-color); 
+            border: 1px solid var(--accent-color); 
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .character-info-card {
+            background-color: rgba(27, 34, 50, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            display: none;
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.05);
+        }
+
+        .info-card-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-card-text {
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.4;
+        }
 
         .level-tracker-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 20px;
+        }
+
+        .planner-result-bar {
+            background: rgba(255, 215, 0, 0.02);
+            border: 1px solid rgba(74, 62, 37, 0.6);
+            border-radius: 6px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .planner-bar-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .planner-bar-values {
+            text-align: right;
+        }
+
+        .planner-main-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+        }
+
+        .planner-sub-value {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 1px;
         }
 
         .custom-inputs {
@@ -284,7 +376,7 @@
         }
 
         .table-container {
-            margin-top: 30px;
+            margin-top: 15px;
             overflow-x: auto;
         }
 
@@ -478,6 +570,21 @@
             margin-top: 2px;
             font-style: italic;
         }
+
+        @media (max-width: 650px) {
+            .level-tracker-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .planner-result-bar {
+                flex-direction: column;
+                gap: 6px;
+                text-align: center;
+            }
+            .planner-bar-values {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -523,17 +630,35 @@
         </div>
     </div>
 
+    <div class="character-info-card" id="characterInfoBox">
+        <div class="info-card-title">⚠️ Character-specific information:</div>
+        <div class="info-card-text" id="characterInfoText"></div>
+    </div>
+
     <div class="level-tracker-grid" style="margin-top: 15px;">
-        <div class="form-group">
-            <label for="currentLevel">Your Current Level:</label>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="currentLevel">Current Level:</label>
             <input type="number" id="currentLevel" value="1" min="1" max="50">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 0;">
             <label for="targetLevel">Target Level:</label>
             <input type="number" id="targetLevel" value="50" min="1" max="50">
         </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="farmsPerDay">Farms per Day (Hours):</label>
+            <input type="number" id="farmsPerDay" value="4" min="1" max="24">
+        </div>
     </div>
 
+    <div class="planner-result-bar">
+        <span class="planner-bar-title">Estimated Grind Duration:</span>
+        <div class="planner-bar-values">
+            <div id="daysResultDisplay" class="planner-main-value">0 Days</div>
+            <div id="exactDaysDisplay" class="planner-sub-value">(0.0 Days exact)</div>
+        </div>
+    </div>
+
+    <!-- Custom Threshold Input Fields -->
     <div id="customInputs" class="custom-inputs">
         <label>Enter Custom Metrics per Level Bracket:</label>
         <div class="grid-row">
@@ -595,6 +720,7 @@
     </div>
 </div>
 
+<!-- POPUP MODAL -->
 <div class="modal-overlay" id="statsModal">
     <div class="modal-content">
         <h3>Global Core Stats Setup</h3>
@@ -628,7 +754,8 @@
             </div>
             <div class="form-group">
                 <label for="modalFinals">Finals (DPS Stat):</label>
-                <input type="number" id="modalFinals" value="77" min="0">
+                <input type="number" id="modalFinals" value="77" min="0" max="80">
+                <div class="stat-limit-hint">Max 80</div>
             </div>
         </div>
 
@@ -702,13 +829,34 @@
         "Wolverine": { class: "DPS", lines: [[4400, 5], [8800, 10], [13000, 15], [18000, 20], [18000, 20]] }
     };
 
+    const levelRanges = [
+        { min: 1,  max: 5,  costPerLevel: 125,  questPoints: 7,  timePoints: 80,  name: "Lvl 1 - 5", badge: "" },
+        { min: 5,  max: 10, costPerLevel: 240,  questPoints: 13, timePoints: 80,  name: "Lvl 5 - 10", badge: "" },
+        { min: 10, max: 15, costPerLevel: 400,  questPoints: 20, timePoints: 80,  name: "Lvl 10 - 15", badge: "" },
+        { min: 15, max: 20, costPerLevel: 480,  questPoints: 26, timePoints: 80,  name: "Lvl 15 - 20", badge: '<span class="rank-badge rank-lord">[Lord]</span>' },
+        { min: 20, max: 50, costPerLevel: 1600, questPoints: 80, timePoints: 240, name: "Lvl 20 - 50", badge: '<span class="rank-badge rank-champion">[Champion]</span>' }
+    ];
+
+    // ERSTELLUNG DER PRÄZISEN SORTIERUNGSLOGIK (1. Tanks, 2. DPS, 3. Support -> und alphabetisch innerhalb)
+    const roleSortOrder = { "Tank": 1, "DPS": 2, "Support": 3 };
+    const sortedCharacterNames = Object.keys(database).sort((a, b) => {
+        const roleA = database[a].class;
+        const roleB = database[b].class;
+        if (roleSortOrder[roleA] !== roleSortOrder[roleB]) {
+            return roleSortOrder[roleA] - roleSortOrder[roleB];
+        }
+        return a.localeCompare(b);
+    });
+
     let selectedCharacterKey = "custom"; 
 
     const searchInput = document.getElementById("charSearch");
     const panel = document.getElementById("suggestionsPanel");
     const roleFilter = document.getElementById("roleFilter");
     const customInputsDiv = document.getElementById("customInputs");
-    
+    const infoBox = document.getElementById("characterInfoBox");
+    const infoText = document.getElementById("characterInfoText");
+
     const statsModal = document.getElementById("statsModal");
     const openStatsBtn = document.getElementById("openStatsModal");
     const closeStatsBtn = document.getElementById("closeStatsModal");
@@ -740,13 +888,14 @@
         let newDmg = Math.min(200000, Math.max(0, parseFloat(document.getElementById("modalDmg").value) || 0));
         let newBlocked = Math.min(200000, Math.max(0, parseFloat(document.getElementById("modalBlocked").value) || 0));
         let newHealing = Math.min(200000, Math.max(0, parseFloat(document.getElementById("modalHealing").value) || 0));
+        let newFinals = Math.min(80, Math.max(0, parseFloat(document.getElementById("modalFinals").value) || 0));
         
         coreStats.dmg = newDmg;
         coreStats.blocked = newBlocked;
         coreStats.healing = newHealing;
         coreStats.Tank = Math.max(0, parseFloat(document.getElementById("modalKos").value) || 0);
         coreStats.Support = Math.max(0, parseFloat(document.getElementById("modalAssists").value) || 0);
-        coreStats.DPS = Math.max(0, parseFloat(document.getElementById("modalFinals").value) || 0);
+        coreStats.DPS = newFinals;
 
         statsModal.classList.remove("active");
         calculate(); 
@@ -765,7 +914,8 @@
             panel.appendChild(div);
         }
 
-        for (const name in database) {
+        // Nutzt jetzt das vorsortierte Array anstelle des unsortierten Objekts
+        sortedCharacterNames.forEach(name => {
             const data = database[name];
             const matchesSearch = name.toLowerCase().includes(query);
             const matchesRole = (activeRole === "ALL" || data.class === activeRole);
@@ -778,7 +928,7 @@
                 div.onclick = () => selectHero(name, name);
                 panel.appendChild(div);
             }
-        }
+        });
         panel.style.display = panel.children.length > 0 ? "block" : "none";
     }
 
@@ -787,6 +937,16 @@
         searchInput.value = (key === "custom") ? "" : displayName;
         panel.style.display = "none";
         customInputsDiv.style.display = (key === "custom") ? "block" : "none";
+
+        if (key === "Scarlet Witch") {
+            infoText.textContent = "Relying solely on their primary attacks prolongs the process and may prevent you from reaching the cap within 60 minutes";
+            infoBox.style.display = "block";
+        } else if (key === "White Fox") {
+            infoText.textContent = "For whitefox's calculation to apply, there must always be 2 white foxes in a game";
+            infoBox.style.display = "block";
+        } else {
+            infoBox.style.display = "none";
+        }
 
         if (key !== "custom" && database[key]) {
             const charClass = database[key].class;
@@ -808,7 +968,6 @@
         calculate();
     }
 
-    // WICHTIG: Event-Listener für Eingabeänderungen sicherstellen!
     searchInput.addEventListener("click", () => { searchInput.value = ""; showSuggestions(); });
     searchInput.addEventListener("focus", showSuggestions);
     searchInput.addEventListener("input", showSuggestions);
@@ -822,34 +981,26 @@
 
     document.getElementById("currentLevel").addEventListener("input", calculate);
     document.getElementById("targetLevel").addEventListener("input", calculate);
+    document.getElementById("farmsPerDay").addEventListener("input", calculate);
     document.getElementById("customClass").addEventListener("change", calculate);
     for (let i = 1; i <= 5; i++) {
         document.getElementById(`custom_d${i}`).addEventListener('input', calculate);
         document.getElementById(`custom_c${i}`).addEventListener('input', calculate);
     }
 
-    // Neue kaufmännische Rundungsfunktion (Rundet ab .5 auf)
     function formatFarms(farmsValue) {
         if (farmsValue <= 0) return "0 Farms";
-        // Kaufmännisches Runden
-        const roundedFarms = Math.round(farmsValue);
-        return `${roundedFarms} Farms`;
+        return `${Math.round(farmsValue)} Farms`;
     }
-
-    const levelRanges = [
-        { min: 1,  max: 5,  costPerLevel: 125,  questPoints: 7,  timePoints: 80,  name: "Lvl 1 - 5", badge: "" },
-        { min: 5,  max: 10, costPerLevel: 240,  questPoints: 13, timePoints: 80,  name: "Lvl 5 - 10", badge: "" },
-        { min: 10, max: 15, costPerLevel: 400,  questPoints: 20, timePoints: 80,  name: "Lvl 10 - 15", badge: "" },
-        { min: 15, max: 20, costPerLevel: 480,  questPoints: 26, timePoints: 80,  name: "Lvl 15 - 20", badge: '<span class="rank-badge rank-lord">[Lord]</span>' },
-        { min: 20, max: 50, costPerLevel: 1600, questPoints: 80, timePoints: 240, name: "Lvl 20 - 50", badge: '<span class="rank-badge rank-champion">[Champion]</span>' }
-    ];
 
     function calculate() {
         let currentLvl = parseInt(document.getElementById("currentLevel").value) || 1;
         let targetLvl = parseInt(document.getElementById("targetLevel").value) || 50;
+        let farmsPerDay = parseFloat(document.getElementById("farmsPerDay").value) || 1;
 
         if (currentLvl < 1) currentLvl = 1; if (currentLvl > 50) currentLvl = 50;
         if (targetLvl < 1) targetLvl = 1; if (targetLvl > 50) targetLvl = 50;
+        if (farmsPerDay < 1) farmsPerDay = 1;
 
         let charClass = "";
         let lines = [];
@@ -882,7 +1033,7 @@
         let farmsCumulative = 0;
         let firstPrintedRow = true;
         const tableBody = document.getElementById("resultTableBody");
-        tableBody.innerHTML = ""; // Tabelle leeren
+        tableBody.innerHTML = ""; 
 
         levelRanges.forEach((range, index) => {
             if (range.min >= targetLvl) return;
@@ -919,13 +1070,21 @@
             firstPrintedRow = false;
         });
 
-        // Wenn keine Zeilen generiert wurden, Hinweis anzeigen
-        if (tableBody.innerHTML === "" || currentLvl >= targetLvl) {
+        const daysResultDisplay = document.getElementById("daysResultDisplay");
+        const exactDaysDisplay = document.getElementById("exactDaysDisplay");
+
+        if (tableBody.innerHTML === "" || currentLvl >= targetLvl || farmsCumulative <= 0) {
             tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Your target level is equal to or lower than your current level!</td></tr>`;
+            daysResultDisplay.textContent = "0 Days";
+            exactDaysDisplay.textContent = "(0.0 Days exact)";
+        } else {
+            let totalDaysNeeded = farmsCumulative / farmsPerDay;
+            daysResultDisplay.textContent = `${Math.round(totalDaysNeeded)} Days`;
+            exactDaysDisplay.textContent = `(${totalDaysNeeded.toFixed(1)} Days exact)`;
         }
     }
 
-    calculate(); // Initiale Berechnung
+    calculate(); 
 </script>
 
 </body>
