@@ -1247,18 +1247,19 @@
             lines = database[selectedCharacterKey].lines;
         }
 
-        let activeBigStatValue = coreStats.dmg; 
-        if (charClass === "Support") {
-            activeBigStatValue = coreStats.healing; 
-        } else if (charClass === "Tank") {
-            activeBigStatValue = coreStats.blocked; 
-        }
+      let activeBigStatValue = 0;
+let activeClassStatValue = 0;
 
-        let activeClassStatValue = coreStats[charClass];
-        if (charClass === "Support") {
-            activeClassStatValue = coreStats.Tank + coreStats.Support;
-        }
-
+if (charClass === "DPS") {
+    activeBigStatValue = coreStats.dmg;
+    activeClassStatValue = coreStats.DPS; 
+} else if (charClass === "Tank") {
+    activeBigStatValue = coreStats.blocked;
+    activeClassStatValue = coreStats.Tank; 
+} else if (charClass === "Support") {
+    activeBigStatValue = coreStats.healing;
+    activeClassStatValue = coreStats.Tank + coreStats.Support; 
+}
         let farmsCumulative = 0;
         let firstPrintedRow = true;
         tableBody.innerHTML = ""; 
